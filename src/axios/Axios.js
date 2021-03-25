@@ -2,7 +2,7 @@
  * @Author: dfh
  * @Date: 2021-03-26 07:07:39
  * @LastEditors: dfh
- * @LastEditTime: 2021-03-26 07:19:48
+ * @LastEditTime: 2021-03-26 07:35:23
  * @Modified By: dfh
  * @FilePath: /day33-axios/src/axios/Axios.js
  */
@@ -17,7 +17,7 @@ class Axios {
 
     dispatchRequest(config) {
         return new Promise((resolve, reject) => {
-            let { url, method, params } = config;
+            let { url, method = 'get', params, data, headers } = config;
             if (params) {//{name:'zhangsan',password:'123456'}=>name='zhangsan'&password='123456'
                 params = qs.stringify(params);
                 url = url + (url.indexOf('?') > -1 ? '&' : '?') + params;
@@ -44,7 +44,20 @@ class Axios {
                     }
                 }
             }
-            xhr.send();
+
+            //请求头的处理
+            if (headers) {
+                Object.keys(headers).forEach(key => {
+                    xhr.setRequestHeader(key, headers[key]);
+                })
+            }
+
+            //请求体的处理
+            let body = null;
+            if (typeof data === 'object' && data !== null) {
+                body = JSON.stringify(data);//转化为字符串
+            }
+            xhr.send(body);
         })
     }
 }

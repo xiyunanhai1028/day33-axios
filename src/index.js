@@ -2,7 +2,7 @@
  * @Author: dfh
  * @Date: 2021-03-26 06:52:06
  * @LastEditors: dfh
- * @LastEditTime: 2021-03-26 07:19:11
+ * @LastEditTime: 2021-03-26 07:34:41
  * @Modified By: dfh
  * @FilePath: /day33-axios/src/index.js
  */
@@ -13,9 +13,12 @@ const user = {
     password: '123456'
 }
 axios({
-    url:baseUrl+ '/get',
-    method: 'get',
-    params: user
+    url:baseUrl+ '/post',
+    method: 'post',
+    headers:{
+        'Content-Type':'application/json'
+    },
+    data:user
 }).then(response => {
     console.log(response);
 }).catch(error => {
