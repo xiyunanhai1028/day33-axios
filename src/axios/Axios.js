@@ -2,16 +2,40 @@
  * @Author: dfh
  * @Date: 2021-03-26 07:07:39
  * @LastEditors: dfh
- * @LastEditTime: 2021-03-26 09:02:20
+ * @LastEditTime: 2021-03-26 09:34:55
  * @Modified By: dfh
  * @FilePath: /day33-axios/src/axios/Axios.js
  */
 import qs from 'qs';
 import parseHeaders from 'parse-headers';
 import AxiosInterceptorManager from './AxiosInterceptorManager';
+
+//默认配置
+const defaults = {
+    method: 'get',
+    timeout: 0,
+    headers: {
+        common: {
+            accept: 'application/json'
+        }
+    }
+}
+const getStyleMethods = ['get', 'head', 'delete', 'options'];
+getStyleMethods.forEach(method => {
+    defaults.headers[method] = {}
+})
+
+const postStyleMethods = ['put', 'post', 'patch'];
+postStyleMethods.forEach(method => {
+    defaults.headers[method] = {}
+})
+
+const allMethods = [...getStyleMethods, ...postStyleMethods];
+
 class Axios {
 
     constructor() {
+        this.defaults = defaults;
         this.interceptors = {
             request: new AxiosInterceptorManager(),//请求拦截器的管理者
             response: new AxiosInterceptorManager()//响应拦截器的管理者
@@ -19,6 +43,9 @@ class Axios {
     }
 
     request(config = {}) {
+        //合并默认配置headers和用户自己配置headers
+        config.headers = Object.assign(this.defaults.headers, config.headers);
+
         const chain = [{//设置真正发请求的，然后将请求拦截出入前面，响应拦截插入后面，实现现走请求拦截，再发请求，最后响应拦截
             onFulfilled: this.dispatchRequest,
             onRejected: undefined
@@ -48,7 +75,7 @@ class Axios {
                 url = url + (url.indexOf('?') > -1 ? '&' : '?') + params;
             }
             const xhr = new XMLHttpRequest();
-            //第三个参数异步
+            //第三个参数异步i,
             xhr.open(method, url, true);
             //设置返回值为json
             xhr.responseType = 'json';
@@ -72,8 +99,22 @@ class Axios {
 
             //请求头的处理
             if (headers) {
+                /**
+                 * headers:{
+                 *   common:{accept: 'application/json'},
+                 *   post:{'content-type':'application/json'}
+                 * }
+                 */
                 Object.keys(headers).forEach(key => {
-                    xhr.setRequestHeader(key, headers[key]);
+                    if (key === 'common' || allMethods.includes(key)) {
+                        if (key === 'common' || key === config.method) {
+                            Object.keys(headers[key]).forEach(key2 => {
+                                xhr.setRequestHeader(key2, headers[key][key2]);
+                            })
+                        }
+                    } else {
+                        xhr.setRequestHeader(key, headers[key]);
+                    }
                 })
             }
 
