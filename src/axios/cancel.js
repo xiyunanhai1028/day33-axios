@@ -2,13 +2,14 @@
  * @Author: dfh
  * @Date: 2021-03-27 11:19:43
  * @LastEditors: dfh
- * @LastEditTime: 2021-03-27 11:40:49
+ * @LastEditTime: 2021-03-27 11:53:10
  * @Modified By: dfh
  * @FilePath: /day33-axios/src/axios/cancel.js
  */
 
 export class Cancel {
     constructor(reason) {
+        //存放取消的原因
         this.reason = reason;
     }
 }
