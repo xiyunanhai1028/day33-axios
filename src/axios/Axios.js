@@ -2,7 +2,7 @@
  * @Author: dfh
  * @Date: 2021-03-26 07:07:39
  * @LastEditors: dfh
- * @LastEditTime: 2021-03-26 09:34:55
+ * @LastEditTime: 2021-03-27 10:20:54
  * @Modified By: dfh
  * @FilePath: /day33-axios/src/axios/Axios.js
  */
@@ -16,18 +16,20 @@ const defaults = {
     timeout: 0,
     headers: {
         common: {
-            accept: 'application/json'
+            accept: 'application/json'//告诉服务器，接受json数据
         }
     }
 }
-const getStyleMethods = ['get', 'head', 'delete', 'options'];
+const getStyleMethods = ['get', 'head', 'delete', 'options'];//get风格的请求
 getStyleMethods.forEach(method => {
     defaults.headers[method] = {}
 })
 
-const postStyleMethods = ['put', 'post', 'patch'];
+const postStyleMethods = ['put', 'post', 'patch'];//post风格的请求，会有请求体，需要加默认请求体格式
 postStyleMethods.forEach(method => {
-    defaults.headers[method] = {}
+    defaults.headers[method] = {
+        'content-type':'application/json'//请求体格式
+    }
 })
 
 const allMethods = [...getStyleMethods, ...postStyleMethods];
