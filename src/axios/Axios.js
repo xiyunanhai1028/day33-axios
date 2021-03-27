@@ -2,7 +2,7 @@
  * @Author: dfh
  * @Date: 2021-03-26 07:07:39
  * @LastEditors: dfh
- * @LastEditTime: 2021-03-27 11:12:02
+ * @LastEditTime: 2021-03-27 11:42:55
  * @Modified By: dfh
  * @FilePath: /day33-axios/src/axios/Axios.js
  */
@@ -94,8 +94,8 @@ class Axios {
             //设置返回值为json
             xhr.responseType = 'json';
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status >= 200 && xhr.status !== 0) {
+                if (xhr.readyState === 4 && xhr.status !== 0) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
                         let response = {
                             data: xhr.response,
                             headers: parseHeaders(xhr.getAllResponseHeaders()),
@@ -156,6 +156,14 @@ class Axios {
                 reject(new Error(`net::ERR_INTERNET_DISCONNECTED`));
             }
 
+            //处理用户自己取消的操作
+            if (config.cancelToken) {
+                config.cancelToken.then(reason => {
+                    debugger
+                    xhr.abort();//取消请求
+                    reject(reason);
+                })
+            }
             xhr.send(body);
         })
     }
