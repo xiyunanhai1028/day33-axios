@@ -2,7 +2,7 @@
  * @Author: dfh
  * @Date: 2021-03-26 07:07:39
  * @LastEditors: dfh
- * @LastEditTime: 2021-03-27 10:20:54
+ * @LastEditTime: 2021-03-27 11:12:02
  * @Modified By: dfh
  * @FilePath: /day33-axios/src/axios/Axios.js
  */
@@ -16,8 +16,17 @@ const defaults = {
     timeout: 0,
     headers: {
         common: {
-            accept: 'application/json'//告诉服务器，接受json数据
+            accept: 'application/json'//指定告诉服务器返回JSON格式的数据
         }
+    },
+    transformRequest: function (data, headers) {
+        headers['content-type'] = 'application/x-www-form-urlencoded';
+        return qs.stringify(data);
+    },
+    transformResponse: function (data) {
+        if (typeof data === 'string');
+        data = JSON.parse(data);
+        return data;
     }
 }
 const getStyleMethods = ['get', 'head', 'delete', 'options'];//get风格的请求
@@ -28,7 +37,7 @@ getStyleMethods.forEach(method => {
 const postStyleMethods = ['put', 'post', 'patch'];//post风格的请求，会有请求体，需要加默认请求体格式
 postStyleMethods.forEach(method => {
     defaults.headers[method] = {
-        'content-type':'application/json'//请求体格式
+        'content-type': 'application/json'//请求体格式
     }
 })
 
@@ -47,7 +56,10 @@ class Axios {
     request(config = {}) {
         //合并默认配置headers和用户自己配置headers
         config.headers = Object.assign(this.defaults.headers, config.headers);
-
+        //如果有请求转换，执行
+        if (config.transformRequest && config.data) {
+            config.data = config.transformRequest(config.data, config.headers);
+        }
         const chain = [{//设置真正发请求的，然后将请求拦截出入前面，响应拦截插入后面，实现现走请求拦截，再发请求，最后响应拦截
             onFulfilled: this.dispatchRequest,
             onRejected: undefined
@@ -84,13 +96,18 @@ class Axios {
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status >= 200 && xhr.status !== 0) {
-                        const response = {
+                        let response = {
                             data: xhr.response,
                             headers: parseHeaders(xhr.getAllResponseHeaders()),
                             status: xhr.status,
                             statusText: xhr.statusText,
                             config,
                             request: xhr
+                        }
+                        debugger
+                        //响应转换
+                        if (config.transformResponse) {
+                            response = config.transformResponse(response);
                         }
                         resolve(response);
                     } else {
